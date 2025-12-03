@@ -18,16 +18,16 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("API de Gerenciamento de Eventos")  // Título da API exibido no Swagger.
-                        .version("1.0.0")  // Versão da API.
+                        .title("API de Gerenciamento de Eventos")  
+                        .version("1.0.0")  
                         .description("Uma API simples para gerenciar eventos e participantes, com CRUD e inscrições. " +
-                                "Usada para fins educacionais.")  // Descrição detalhada.
-                        .termsOfService("http://example.com/terms")  // Link para termos de serviço (opcional).
+                                "Usada para fins educacionais.")  
+                        .termsOfService("http://example.com/terms")  
                         .license(new License()
-                                .name("Apache 2.0")  // Licença da API.
+                                .name("Apache 2.0")  
                                 .url("http://www.apache.org/licenses/LICENSE-2.0.html")))
                 .servers(List.of(new Server()
-                        .url("http://localhost:8080")  // Servidor local para desenvolvimento.
+                        .url("http://localhost:8080")  
                         .description("Servidor de Desenvolvimento")));
     }
 }
