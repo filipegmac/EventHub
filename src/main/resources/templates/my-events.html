@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Meus Eventos')}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <main class="main-content">
+        <div class="container">
+            <!-- Mensagens -->
+            <div th:replace="~{fragments/layout :: messages}"></div>
+            
+            <!-- Header da página -->
+            <div class="page-header">
+                <h1>Meus Eventos</h1>
+            </div>
+            
+            <!-- Lista de eventos -->
+            <div class="table-container" th:if="${!events.isEmpty()}">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Data</th>
+                            <th>Local</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="event : ${events}">
+                            <td th:text="${event.name}">Nome do Evento</td>
+                            <td th:text="${#temporals.format(event.date, 'dd/MM/yyyy')}">01/01/2024</td>
+                            <td th:text="${event.location}">Local</td>
+                            <td>
+                                <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-sm btn-primary">
+                                    Ver Detalhes
+                                </a>
+                                <form th:action="@{/events/{eventId}/leave(eventId=${event.id})}"
+                                      method="post"
+                                      style="display:inline; margin-left: 0.5rem;">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Sair do evento
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Estado vazio -->
+            <div class="empty-state" th:if="${events.isEmpty()}">
+                <div class="empty-content">
+                    <span class="empty-icon">📅</span>
+                    <h3>Nenhum evento</h3>
+                    <p>Você ainda não foi convidado para nenhum evento.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

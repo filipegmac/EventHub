@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${event.id} != null ? 'Editar Evento' : 'Novo Evento')}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <main class="main-content">
+        <div class="container">
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a th:href="@{/events}">← Voltar para Eventos</a>
+            </nav>
+            
+            <!-- Form Card -->
+            <div class="form-card">
+                <div class="form-header">
+                    <h1 th:text="${event.id} != null ? 'Editar Evento' : 'Novo Evento'">Formulário de Evento</h1>
+                    <p th:text="${event.id} != null ? 'Atualize as informações do evento' : 'Preencha os dados para criar um novo evento'">
+                        Descrição do formulário
+                    </p>
+                </div>
+                
+                <form th:action="@{/events/save}" th:object="${event}" method="post" class="form">
+                    <!-- Hidden ID for edit -->
+                    <input type="hidden" th:if="${event.id != null}" th:field="*{id}">
+                    
+                    <div class="form-group">
+                        <label for="name">Nome do Evento *</label>
+                        <input type="text" id="name" th:field="*{name}" required 
+                               placeholder="Ex: Conferência de Tecnologia 2024"
+                               class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="date">Data *</label>
+                        <input type="date" id="date" th:field="*{date}" required 
+                               class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="location">Local *</label>
+                        <input type="text" id="location" th:field="*{location}" required 
+                               placeholder="Ex: Centro de Convenções, São Paulo - SP"
+                               class="form-control">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <a th:href="@{/events}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">
+                            <span th:text="${event.id} != null ? 'Salvar Alterações' : 'Criar Evento'">Salvar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

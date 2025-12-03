@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | EventHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <span class="login-icon">📅</span>
+                <h1>EventHub</h1>
+                <p>Plataforma de Agendamento de Eventos</p>
+            </div>
+            
+            <div th:if="${param.error}" class="alert alert-error">
+                <span class="alert-icon">✗</span>
+                E-mail ou senha inválidos.
+            </div>
+            
+            <div th:if="${param.logout}" class="alert alert-success">
+                <span class="alert-icon">✓</span>
+                Logout realizado com sucesso.
+            </div>
+            
+            <div th:if="${success}" class="alert alert-success">
+                <span class="alert-icon">✓</span>
+                <span th:text="${success}">Sucesso</span>
+            </div>
+            
+            <form th:action="@{/login}" method="post" class="login-form">
+                <div class="form-group">
+                    <label for="username">E-mail</label>
+                    <input type="email" id="username" name="username" required autofocus 
+                           placeholder="seu@email.com"
+                           class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" required 
+                           placeholder="Digite sua senha"
+                           class="form-control">
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+            </form>
+            
+            <div class="login-footer">
+                <p class="login-hint">
+                    Não tem uma conta? <a th:href="@{/register}">Cadastre-se</a>
+                </p>
+                <p class="login-hint" style="margin-top: 0.5rem;">
+                    <strong>Admin:</strong> <code>admin@eventhub.com</code> / <code>admin</code>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

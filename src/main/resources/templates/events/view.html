@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Detalhes do Evento')}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <main class="main-content">
+        <div class="container">
+            <!-- Mensagens -->
+            <div th:replace="~{fragments/layout :: messages}"></div>
+            
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a th:href="@{/events}">← Voltar para Eventos</a>
+            </nav>
+            
+            <!-- Event Details Card -->
+            <div class="detail-card">
+                <div class="detail-header">
+                    <h1 th:text="${event.name}">Nome do Evento</h1>
+                    <div class="detail-actions">
+                        <a th:if="${isOwner}"
+                           th:href="@{/events/edit/{id}(id=${event.id})}"
+                           class="btn btn-warning"
+                           sec:authorize="isAuthenticated()">
+                            ✏ Editar
+                        </a>
+                        <a th:if="${isOwner}"
+                           th:href="@{/events/delete/{id}(id=${event.id})}" 
+                           class="btn btn-danger"
+                           sec:authorize="isAuthenticated()"
+                           onclick="return confirm('Tem certeza que deseja excluir este evento?')">
+                            🗑 Excluir
+                        </a>
+                        <form th:if="${canLeave}"
+                              th:action="@{/events/{eventId}/leave(eventId=${event.id})}"
+                              method="post"
+                              style="display:inline;">
+                            <button type="submit" class="btn btn-outline-danger">
+                                Sair do evento
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="detail-body">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">📆 Data</span>
+                            <span class="detail-value" th:text="${#temporals.format(event.date, 'dd/MM/yyyy')}">01/01/2024</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">📍 Local</span>
+                            <span class="detail-value" th:text="${event.location}">Local do Evento</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">👥 Total de Participantes</span>
+                            <span class="detail-value" th:text="${event.participants.size()}">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Invite Participant Section (somente para o dono do evento) -->
+            <div class="section-card" sec:authorize="isAuthenticated()" th:if="${isOwner}">
+                <h2>Convidar Participante</h2>
+                <p>Digite o e-mail do participante para enviar um convite:</p>
+                
+                <form th:action="@{/events/{eventId}/invite(eventId=${event.id})}" method="post" class="invite-form">
+                    <div class="form-group">
+                        <input type="email" name="email" required placeholder="Digite o e-mail do participante" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Enviar Convite</button>
+                </form>
+            </div>
+            
+            <!-- Participants List -->
+            <div class="section-card">
+                <h2>Participantes Registrados</h2>
+                
+                <div class="participants-grid" th:if="${not #lists.isEmpty(event.participants)}">
+                    <div th:each="participant : ${event.participants}" class="participant-card">
+                        <div class="participant-avatar">👤</div>
+                        <div class="participant-details">
+                            <strong th:text="${participant.name}">Nome do Participante</strong>
+                            <span th:text="${participant.email}">email@example.com</span>
+                        </div>
+                        <a th:href="@{/participants/{id}(id=${participant.id})}" class="btn btn-sm btn-secondary" sec:authorize="hasRole('ADMIN')">
+                            Ver Perfil
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="empty-inline" th:if="${#lists.isEmpty(event.participants)}">
+                    <span class="empty-icon-sm">👥</span>
+                    <p>Nenhum participante registrado neste evento.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

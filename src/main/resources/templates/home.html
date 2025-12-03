@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Início')}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <main class="main-content">
+        <div class="container">
+            <!-- Mensagens -->
+            <div th:replace="~{fragments/layout :: messages}"></div>
+            
+            <!-- Hero Section -->
+            <section class="hero">
+                <h1>Bem-vindo ao EventHub</h1>
+                <p>Gerencie seus eventos e participantes de forma simples e eficiente.</p>
+            </section>
+            
+            <!-- Dashboard Cards -->
+            <section class="dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📆</div>
+                        <div class="stat-info">
+                            <span class="stat-value" th:text="${totalEvents}">0</span>
+                            <span class="stat-label">Eventos</span>
+                        </div>
+                        <a th:href="@{/events}" class="stat-link">Ver todos →</a>
+                    </div>
+                    
+                    <div class="stat-card" sec:authorize="hasRole('ADMIN')">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <span class="stat-value" th:text="${totalParticipants}">0</span>
+                            <span class="stat-label">Participantes</span>
+                        </div>
+                        <a th:href="@{/participants}" class="stat-link">Ver todos →</a>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Quick Actions -->
+            <section class="quick-actions" sec:authorize="isAuthenticated()">
+                <h2>Ações Rápidas</h2>
+                <div class="actions-grid">
+                    <a th:href="@{/events/new}" class="action-card">
+                        <span class="action-icon">➕</span>
+                        <span class="action-text">Novo Evento</span>
+                    </a>
+                    <a th:href="@{/participants/new}" class="action-card" sec:authorize="hasRole('ADMIN')">
+                        <span class="action-icon">➕</span>
+                        <span class="action-text">Novo Participante</span>
+                    </a>
+                </div>
+            </section>
+            
+            <!-- Recent Events -->
+            <section class="recent-events" th:if="${not #lists.isEmpty(recentEvents)}">
+                <h2>Eventos Recentes</h2>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Data</th>
+                                <th>Local</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="event : ${recentEvents}">
+                                <td th:text="${event.name}">Nome do Evento</td>
+                                <td th:text="${#temporals.format(event.date, 'dd/MM/yyyy')}">01/01/2024</td>
+                                <td th:text="${event.location}">Local</td>
+                                <td>
+                                    <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-sm btn-secondary">
+                                        Ver Detalhes
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Empty State -->
+            <section class="empty-state" th:if="${#lists.isEmpty(recentEvents)}">
+                <div class="empty-content">
+                    <span class="empty-icon">📅</span>
+                    <h3>Nenhum evento cadastrado</h3>
+                    <p>Comece criando seu primeiro evento!</p>
+                    <a th:href="@{/events/new}" class="btn btn-primary" sec:authorize="isAuthenticated()">
+                        Criar Evento
+                    </a>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Notificações')}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <main class="main-content">
+        <div class="container">
+            <!-- Mensagens -->
+            <div th:replace="~{fragments/layout :: messages}"></div>
+            
+            <!-- Header da página -->
+            <div class="page-header">
+                <h1>Notificações</h1>
+                <form th:action="@{/notifications/read-all}" method="post" th:if="${!notifications.isEmpty()}">
+                    <button type="submit" class="btn btn-secondary">Marcar todas como lidas</button>
+                </form>
+            </div>
+            
+            <!-- Lista de notificações -->
+            <div class="notifications-list" th:if="${!notifications.isEmpty()}">
+                <div th:each="notification : ${notifications}" 
+                     class="notification-card"
+                     th:classappend="${!notification.read} ? 'unread' : ''">
+                    <div class="notification-icon">
+                        <span th:if="${notification.invite and notification.pending}">📩</span>
+                        <span th:if="${notification.invite and notification.status == 'ACCEPTED'}">✅</span>
+                        <span th:if="${notification.invite and notification.status == 'REJECTED'}">❌</span>
+                        <span th:if="${!notification.invite and !notification.read}">🔔</span>
+                        <span th:if="${!notification.invite and notification.read}">✓</span>
+                    </div>
+                    <div class="notification-content">
+                        <p class="notification-message" th:text="${notification.message}">Mensagem</p>
+                        <span class="notification-date" 
+                              th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}">
+                            Data
+                        </span>
+                        <!-- Status do convite -->
+                        <span class="notification-status" th:if="${notification.invite and notification.status == 'ACCEPTED'}">
+                            — Aceito
+                        </span>
+                        <span class="notification-status" th:if="${notification.invite and notification.status == 'REJECTED'}">
+                            — Recusado
+                        </span>
+                    </div>
+                    <!-- Botões de ação para convites pendentes -->
+                    <div class="notification-actions" th:if="${notification.invite and notification.pending}">
+                        <form th:action="@{/notifications/{id}/accept(id=${notification.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-primary">Aceitar</button>
+                        </form>
+                        <form th:action="@{/notifications/{id}/reject(id=${notification.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger">Recusar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Estado vazio -->
+            <div class="empty-state" th:if="${notifications.isEmpty()}">
+                <div class="empty-content">
+                    <span class="empty-icon">🔔</span>
+                    <h3>Nenhuma notificação</h3>
+                    <p>Você não possui notificações no momento.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

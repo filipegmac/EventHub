@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- Fragment: Head -->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' | EventHub'">EventHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<!-- Fragment: Header/Navbar -->
+<header th:fragment="header" class="navbar">
+    <div class="navbar-container">
+        <a th:href="@{/}" class="navbar-brand">
+            <span class="brand-icon">📅</span>
+            <span class="brand-text">EventHub</span>
+        </a>
+        
+        <nav class="navbar-nav">
+            <a th:href="@{/}" class="nav-link" th:classappend="${currentPage == 'home'} ? 'active' : ''">
+                <span class="nav-icon">🏠</span> Início
+            </a>
+            <a th:href="@{/events}" class="nav-link" th:classappend="${currentPage == 'events'} ? 'active' : ''">
+                <span class="nav-icon">📆</span> Eventos
+            </a>
+            <a th:href="@{/my-events}" class="nav-link" th:classappend="${currentPage == 'my-events'} ? 'active' : ''">
+                <span class="nav-icon">🎫</span> Meus Eventos
+            </a>
+            <a th:href="@{/participants}" class="nav-link" th:classappend="${currentPage == 'participants'} ? 'active' : ''" sec:authorize="hasRole('ADMIN')">
+                <span class="nav-icon">👥</span> Participantes
+            </a>
+        </nav>
+        
+        <div class="navbar-user">
+            <a th:href="@{/notifications}" class="nav-link notification-link" 
+               th:classappend="${currentPage == 'notifications'} ? 'active' : ''"
+               sec:authorize="isAuthenticated()">
+                <span class="nav-icon">🔔</span>
+                <span class="notification-badge" th:if="${unreadCount != null && unreadCount > 0}" 
+                      th:text="${unreadCount}">0</span>
+            </a>
+            <span class="user-info" sec:authorize="isAuthenticated()">
+                <span class="user-icon">👤</span>
+                <span sec:authentication="name">Usuário</span>
+                <span class="user-role" sec:authorize="hasRole('ADMIN')">(Admin)</span>
+            </span>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <button type="submit" class="btn btn-logout">Sair</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<!-- Fragment: Footer -->
+<footer th:fragment="footer" class="footer">
+    <div class="footer-container">
+        <p>&copy; 2024 EventHub - Plataforma de Agendamento de Eventos</p>
+    </div>
+</footer>
+
+<!-- Fragment: Messages (alertas de sucesso/erro) -->
+<div th:fragment="messages" class="messages-container">
+    <div th:if="${message}" class="alert alert-success">
+        <span class="alert-icon">✓</span>
+        <span th:text="${message}"></span>
+    </div>
+    <div th:if="${error}" class="alert alert-error">
+        <span class="alert-icon">✗</span>
+        <span th:text="${error}"></span>
+    </div>
+</div>
+
+</html>

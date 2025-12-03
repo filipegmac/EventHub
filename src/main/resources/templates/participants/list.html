@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Participantes')}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <main class="main-content">
+        <div class="container">
+            <!-- Mensagens -->
+            <div th:replace="~{fragments/layout :: messages}"></div>
+            
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-title">
+                    <h1>👥 Participantes</h1>
+                    <p>Gerencie todos os participantes cadastrados</p>
+                </div>
+                <a th:href="@{/participants/new}" class="btn btn-primary" sec:authorize="hasRole('ADMIN')">
+                    + Novo Participante
+                </a>
+            </div>
+            
+            <!-- Participants Table -->
+            <div class="table-container" th:if="${not #lists.isEmpty(participants)}">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Eventos Inscritos</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="participant : ${participants}">
+                            <td th:text="${participant.id}">#</td>
+                            <td>
+                                <div class="user-cell">
+                                    <span class="user-avatar">👤</span>
+                                    <strong th:text="${participant.name}">Nome</strong>
+                                </div>
+                            </td>
+                            <td th:text="${participant.email}">email@example.com</td>
+                            <td>
+                                <span class="badge" th:text="${participant.events.size()}">0</span>
+                            </td>
+                            <td class="actions-cell">
+                                <a th:href="@{/participants/{id}(id=${participant.id})}" class="btn btn-sm btn-secondary">
+                                    👁 Ver
+                                </a>
+                                <a th:href="@{/participants/edit/{id}(id=${participant.id})}" class="btn btn-sm btn-warning" sec:authorize="hasRole('ADMIN')">
+                                    ✏ Editar
+                                </a>
+                                <a th:href="@{/participants/delete/{id}(id=${participant.id})}" 
+                                   class="btn btn-sm btn-danger"
+                                   sec:authorize="hasRole('ADMIN')"
+                                   onclick="return confirm('Tem certeza que deseja excluir este participante?')">
+                                    🗑 Excluir
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Empty State -->
+            <div class="empty-state" th:if="${#lists.isEmpty(participants)}">
+                <div class="empty-content">
+                    <span class="empty-icon">👥</span>
+                    <h3>Nenhum participante encontrado</h3>
+                    <p>Não há participantes cadastrados no sistema.</p>
+                    <a th:href="@{/participants/new}" class="btn btn-primary" sec:authorize="hasRole('ADMIN')">
+                        Cadastrar Primeiro Participante
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

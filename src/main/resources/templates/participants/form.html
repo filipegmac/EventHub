@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${participant.id} != null ? 'Editar Participante' : 'Novo Participante')}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <main class="main-content">
+        <div class="container">
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a th:href="@{/participants}">← Voltar para Participantes</a>
+            </nav>
+            
+            <!-- Form Card -->
+            <div class="form-card">
+                <div class="form-header">
+                    <h1 th:text="${participant.id} != null ? 'Editar Participante' : 'Novo Participante'">Formulário</h1>
+                    <p th:text="${participant.id} != null ? 'Atualize as informações do participante' : 'Preencha os dados para cadastrar um novo participante'">
+                        Descrição do formulário
+                    </p>
+                </div>
+                
+                <form th:action="@{/participants/save}" th:object="${participant}" method="post" class="form">
+                    <!-- Hidden ID for edit -->
+                    <input type="hidden" th:if="${participant.id != null}" th:field="*{id}">
+                    
+                    <div class="form-group">
+                        <label for="name">Nome Completo *</label>
+                        <input type="text" id="name" th:field="*{name}" required 
+                               placeholder="Ex: João da Silva"
+                               class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" th:field="*{email}" required 
+                               placeholder="Ex: joao.silva@email.com"
+                               class="form-control">
+                    </div>
+                    
+                    <!-- Senha apenas para novo participante -->
+                    <div class="form-group" th:if="${participant.id == null}">
+                        <label for="password">Senha *</label>
+                        <input type="password" id="password" th:field="*{password}" required 
+                               placeholder="Senha do participante"
+                               class="form-control" minlength="4">
+                    </div>
+
+                    <!-- Role (Admin pode definir) -->
+                    <div class="form-group" th:if="${participant.id == null}">
+                        <label for="role">Tipo de Usuário</label>
+                        <select id="role" th:field="*{role}" class="form-control">
+                            <option value="USER">Usuário</option>
+                            <option value="ADMIN">Administrador</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <a th:href="@{/participants}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">
+                            <span th:text="${participant.id} != null ? 'Salvar Alterações' : 'Cadastrar Participante'">Salvar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

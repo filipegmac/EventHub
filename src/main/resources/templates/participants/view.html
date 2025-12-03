@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Detalhes do Participante')}"></head>
+<body>
+    <header th:replace="~{fragments/layout :: header}"></header>
+    
+    <main class="main-content">
+        <div class="container">
+            <!-- Mensagens -->
+            <div th:replace="~{fragments/layout :: messages}"></div>
+            
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a th:href="@{/participants}">← Voltar para Participantes</a>
+            </nav>
+            
+            <!-- Participant Details Card -->
+            <div class="detail-card">
+                <div class="detail-header">
+                    <div class="profile-header">
+                        <span class="profile-avatar">👤</span>
+                        <h1 th:text="${participant.name}">Nome do Participante</h1>
+                    </div>
+                    <div class="detail-actions">
+                        <a th:href="@{/participants/edit/{id}(id=${participant.id})}" class="btn btn-warning" sec:authorize="hasRole('ADMIN')">
+                            ✏ Editar
+                        </a>
+                        <a th:href="@{/participants/delete/{id}(id=${participant.id})}" 
+                           class="btn btn-danger"
+                           sec:authorize="hasRole('ADMIN')"
+                           onclick="return confirm('Tem certeza que deseja excluir este participante?')">
+                            🗑 Excluir
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="detail-body">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">📧 Email</span>
+                            <span class="detail-value" th:text="${participant.email}">email@example.com</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">📆 Eventos Inscritos</span>
+                            <span class="detail-value" th:text="${participant.events.size()}">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Events List -->
+            <div class="section-card">
+                <h2>Eventos Inscritos</h2>
+                
+                <div class="events-grid" th:if="${not #lists.isEmpty(participant.events)}">
+                    <div th:each="event : ${participant.events}" class="event-card-mini">
+                        <div class="event-icon">📆</div>
+                        <div class="event-details">
+                            <strong th:text="${event.name}">Nome do Evento</strong>
+                            <span th:text="${#temporals.format(event.date, 'dd/MM/yyyy')} + ' • ' + ${event.location}">
+                                01/01/2024 • Local
+                            </span>
+                        </div>
+                        <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-sm btn-secondary">
+                            Ver Evento
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="empty-inline" th:if="${#lists.isEmpty(participant.events)}">
+                    <span class="empty-icon-sm">📅</span>
+                    <p>Este participante não está inscrito em nenhum evento.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
