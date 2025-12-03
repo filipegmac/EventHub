@@ -7,18 +7,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/events")
 public class EventController {
 
     @Autowired
-    private EventService eventService;  // Injeção do serviço.
+    private EventService eventService;
 
     @PostMapping
-    public Event createEvent(@RequestBody Event event) {
-        return eventService.createEvent(event);
+    public ResponseEntity<Event> createEvent(@RequestBody Event event) {
+        return ResponseEntity.ok(eventService.createEvent(event));
     }
 
     @GetMapping
@@ -28,31 +27,18 @@ public class EventController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Event> getEventById(@PathVariable Long id) {
-        Optional<Event> event = eventService.getEventById(id);
-        return event.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(eventService.getEventById(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Event> updateEvent(@PathVariable Long id, @RequestBody Event event) {
         Event updated = eventService.updateEvent(id, event);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
-        }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{eventId}/register/{participantId}")
-    public ResponseEntity<Event> registerParticipant(@PathVariable Long eventId, @PathVariable Long participantId) {
-        Event updatedEvent = eventService.registerParticipant(eventId, participantId);
-        if (updatedEvent != null) {
-            return ResponseEntity.ok(updatedEvent);
-        }
-        return ResponseEntity.notFound().build();
     }
 }

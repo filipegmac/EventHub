@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/participants")
@@ -17,10 +16,9 @@ public class ParticipantController {
     private ParticipantService participantService;
 
     @PostMapping
-    public Participant createParticipant(@RequestBody Participant participant) {
-        return participantService.createParticipant(participant);
+    public ResponseEntity<Participant> createParticipant(@RequestBody Participant participant) {
+        return ResponseEntity.ok(participantService.createParticipant(participant));
     }
-
 
     @GetMapping
     public List<Participant> getAllParticipants() {
@@ -29,17 +27,14 @@ public class ParticipantController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Participant> getParticipantById(@PathVariable Long id) {
-        Optional<Participant> participant = participantService.getParticipantById(id);
-        return participant.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        Participant participant = participantService.getParticipantById(id);
+        return ResponseEntity.ok(participant);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Participant> updateParticipant(@PathVariable Long id, @RequestBody Participant participant) {
         Participant updated = participantService.updateParticipant(id, participant);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
-        }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
