@@ -1,16 +1,17 @@
 package com.eventhub.service;
 
+import com.eventhub.exception.ResourceNotFoundException;
 import com.eventhub.model.Event;
 import com.eventhub.model.Participant;
 import com.eventhub.repository.EventRepository;
 import com.eventhub.repository.ParticipantRepository;
+import com.eventhub.repository.NotificationRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EventService {
@@ -21,66 +22,77 @@ public class EventService {
     @Autowired
     private ParticipantRepository participantRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
     public Event createEvent(Event event) {
         return eventRepository.save(event);
+    }
+
+
+    public List<Event> getEventsByOwner(Participant owner) {
+        return eventRepository.findByOwner(owner);
     }
 
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }
 
-    public Optional<Event> getEventById(Long id) {
-        return eventRepository.findById(id);
+    public Event getEventById(Long id) {
+        return eventRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado com ID: " + id));
     }
 
     public Event updateEvent(Long id, Event updatedEvent) {
-        Optional<Event> existingEvent = eventRepository.findById(id);
-        if (existingEvent.isPresent()) {
-            Event event = existingEvent.get();
-            event.setName(updatedEvent.getName());
-            event.setDate(updatedEvent.getDate());
-            event.setLocation(updatedEvent.getLocation());
-            return eventRepository.save(event);
-        }
-        return null;
+        Event event = getEventById(id);
+        
+        event.setName(updatedEvent.getName());
+        event.setDate(updatedEvent.getDate());
+        event.setLocation(updatedEvent.getLocation());
+        
+        return eventRepository.save(event);
     }
 
+    @Transactional
     public void deleteEvent(Long id) {
-        eventRepository.deleteById(id);
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado com ID: " + id));
+
+        for (Participant p : event.getParticipants()) {
+            p.getEvents().remove(event);
+        }
+        event.getParticipants().clear();
+
+        notificationRepository.deleteAll(notificationRepository.findByEvent(event));
+
+        eventRepository.delete(event);
     }
 
-    @Autowired
-    private JavaMailSender mailSender;
+    @Transactional
+    public void leaveEvent(Long eventId, Participant participant) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado com ID: " + eventId));
 
-    public Event registerParticipant(Long eventId, Long participantId) {
-        Optional<Event> eventOpt = eventRepository.findById(eventId);
-        Optional<Participant> participantOpt = participantRepository.findById(participantId);
+        event.getParticipants().remove(participant);
+        participant.getEvents().remove(event);
 
-        if (eventOpt.isPresent() && participantOpt.isPresent()) {
-            Event event = eventOpt.get();
-            Participant participant = participantOpt.get();
+        eventRepository.save(event);
+        participantRepository.save(participant);
+    }
 
-            event.getParticipants().add(participant);
-            participant.getEvents().add(event);
+    public void inviteParticipantByEmail(Long eventId, String email) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado com ID: " + eventId));
+        
+        Participant participant = participantRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Participante não encontrado com email: " + email));
 
-            eventRepository.save(event);
-            participantRepository.save(participant);
-
-            // Simulação de notificação: Imprime no console.
-            System.out.println("Notificação: O participante " + participant.getName() +
-                    " foi inscrito no evento " + event.getName() + ".");
-
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(participant.getEmail());
-            message.setSubject("Convite para Evento: " + event.getName());
-            message.setText("Olá " + participant.getName() + ",\n\nVocê foi inscrito no evento '" + event.getName() +
-                    "' que ocorrerá em " + event.getDate() + " no local " + event.getLocation() +
-                    ".\n\nEsperamos você lá!\nEquipe de Gerenciamento de Eventos");
-            mailSender.send(message);
-
-            return event;
-        }
-        return null;
+        String message = "Você foi convidado para o evento '" + event.getName() + 
+                "' em " + event.getDate() + " - " + event.getLocation();
+        notificationService.createInvite(participant, event, message);
     }
 
 }

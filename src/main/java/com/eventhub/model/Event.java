@@ -1,6 +1,7 @@
 package com.eventhub.model;
 
 import jakarta.persistence.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +19,15 @@ public class Event {
     private String name;
 
     @Column(nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
     @Column(nullable = false)
     private String location;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private Participant owner;
 
     @ManyToMany
     @JoinTable(
@@ -39,7 +45,6 @@ public class Event {
         this.date = date;
         this.location = location;
     }
-
 
     public Long getId() {
         return id;
@@ -73,6 +78,14 @@ public class Event {
         this.location = location;
     }
 
+    public Participant getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Participant owner) {
+        this.owner = owner;
+    }
+
     public List<Participant> getParticipants() {
         return participants;
     }
@@ -80,7 +93,6 @@ public class Event {
     public void setParticipants(List<Participant> participants) {
         this.participants = participants;
     }
-
 
     @Override
     public boolean equals(Object o) {
